@@ -14,6 +14,8 @@ HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US;
 rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 """
 
+__author__ = "Shanquel with study group Gabby, Sondos, and Joe"
+
 import os
 import re
 import sys
@@ -24,10 +26,19 @@ import argparse
 def read_urls(filename):
     """Returns a list of the puzzle URLs from the given log file,
     extracting the hostname from the filename itself, sorting
-    alphabetically in increasing order, and screening out duplicates.
+    alphabetically in increasing order, and screening out duplicates
     """
-    # +++your code here+++
-    pass
+    puzzle_URLs = []
+    with open(filename) as f:
+        s = filename.find('_')
+        url = filename[s + 1::]
+        for lines in f:
+            urls_search = re.search(r"GET\s(\S*)", lines)
+            if '/puzzle' in urls_search.group(1):
+                url_grouping = f'http://{url}{urls_search.group(1)}'
+                if url_grouping not in puzzle_URLs:
+                    puzzle_URLs.append(f'{url_grouping}')
+    return sorted(puzzle_URLs, key=lambda u: u[-8:-4])
 
 
 def download_images(img_urls, dest_dir):
@@ -38,8 +49,15 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+    with open("index.html", "w") as f:
+        f.write('<html><body>')
+        for i, url in enumerate(img_urls):
+            urllib.request.urlretrieve(
+                url, os.path.join(dest_dir, "img" + str(i) + ".jpg"))
+            f.write(f'<img src="./{dest_dir}/img{str(i)}.jpg">')
+        f.write('</body></html>')
 
 
 def create_parser():
